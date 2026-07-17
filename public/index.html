@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PsychOps Intelligence</title>
+  <meta name="description" content="A public-source psychedelic policy and operations monitoring surface with explicit source-health and sweep states.">
+  <style>
+    :root{--ink:#14201c;--muted:#5c6964;--paper:#f7f4ed;--card:#fff;--line:#d7ded9;--green:#16794a;--amber:#b45309;--red:#b42318;--blue:#24344a}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{max-width:1120px;margin:auto;padding:42px 22px 80px}h1{font-size:clamp(2rem,5vw,4rem);line-height:1;margin:.2em 0}.eyebrow{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}.lede{max-width:800px;font-size:1.05rem;color:var(--muted)}.notice{margin:24px 0;padding:16px 18px;border:1px solid var(--line);background:#fff8e8;border-radius:14px}.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:28px 0}.metric,.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}.metric strong{display:block;font-size:1.35rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}.card h2{font-size:1.05rem;margin:0 0 8px}.meta{font-size:.78rem;color:var(--muted);margin-bottom:12px}.pill{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.completed_with_findings,.completed{background:#e7f6ee;color:var(--green)}.completed_zero_findings,.never_run{background:#eef1f5;color:var(--blue)}.partial{background:#fff3d8;color:var(--amber)}.failed{background:#fde8e6;color:var(--red)}ul{padding-left:18px}.result{padding:10px 0;border-top:1px solid var(--line)}.result a{color:var(--blue);font-weight:700;text-decoration:none}.error{font-size:.82rem;color:var(--red);background:#fff2f1;padding:8px;border-radius:8px;margin-top:8px}.small{font-size:.82rem;color:var(--muted)}button{border:0;border-radius:10px;background:var(--ink);color:white;padding:10px 14px;font-weight:700;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}footer{margin-top:36px;padding-top:20px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted)}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <div class="eyebrow">Public-source intelligence surface</div>
+  <h1>PsychOps Intelligence</h1>
+  <p class="lede">A monitoring interface for selected psychedelic policy, regulatory and field-intelligence sources. It distinguishes a successful zero-result sweep from a failed, partial, unconfigured or never-run source.</p>
+  <div class="notice"><strong>Scope:</strong> This is research intelligence, not legal, medical or investment advice. A displayed source signal is not a legal conclusion. Source availability and automated retrieval can fail; those failures are shown rather than converted into “no findings.”</div>
+  <div class="summary" id="summary"><div class="metric"><strong>Loading</strong><span>Retrieving source health…</span></div></div>
+  <div class="grid" id="grid"></div>
+  <footer>Last successful sweep and source-level states are reported from the monitor itself. Human review remains necessary before relying on any item.</footer>
+</main>
+<script>
+const labels={completed_with_findings:'Completed — findings',completed_zero_findings:'Completed — zero findings',partial:'Partial — some queries failed',failed:'Failed',never_run:'Never run',not_configured:'Not configured',completed:'Completed'};
+const fmt=v=>v?new Date(v).toLocaleString():'Not available';
+function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function card(c){const state=c.state||'never_run';const results=c.results||[];const errors=c.errors||[];return `<section class="card"><span class="pill ${esc(state)}">${esc(labels[state]||state)}</span><h2>${esc(c.label||c.key)}</h2><div class="meta">Last attempted: ${esc(fmt(c.attemptedAt))}<br>Last successful: ${esc(fmt(c.successfulAt))}<br>Results: ${esc(c.resultCount??results.length)} · Completed queries: ${esc(c.completedQueries??0)} · Failed queries: ${esc(c.failedQueries??errors.length)}</div>${results.length?results.map(r=>`<div class="result"><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a><div class="small">${esc(r.published||'Date unavailable')}</div><div>${esc(r.snippet||'')}</div></div>`).join(''):`<p class="small">No qualifying findings are stored for this source in the latest recorded state.</p>`}${errors.length?errors.map(e=>`<div class="error">${esc(e.message||'Source query failed')}</div>`).join(''):''}</section>`}
+async function load(){const summary=document.querySelector('#summary');const grid=document.querySelector('#grid');try{const r=await fetch('/api/data',{cache:'no-store'});const d=await r.json();const cats=d.categories||[];const findings=cats.reduce((n,c)=>n+(c.resultCount||0),0);const failed=cats.filter(c=>['failed','partial'].includes(c.state)).length;summary.innerHTML=`<div class="metric"><strong>${esc(labels[d.state]||d.state||'Unknown')}</strong><span>Overall sweep state</span></div><div class="metric"><strong>${findings}</strong><span>Stored findings</span></div><div class="metric"><strong>${failed}</strong><span>Sources with errors</span></div><div class="metric"><strong>${esc(fmt(d.lastSuccessfulSweep))}</strong><span>Last successful sweep</span></div>`;grid.innerHTML=cats.map(card).join('')||'<section class="card"><h2>No source records</h2><p>The monitor has not stored any category records.</p></section>';if(!r.ok)throw new Error(d.error||`Data endpoint returned ${r.status}`);}catch(e){summary.innerHTML='<div class="metric"><strong>Failed</strong><span>Source-health endpoint unavailable</span></div>';grid.innerHTML=`<section class="card"><span class="pill failed">Failed</span><h2>Monitor data unavailable</h2><p>${esc(e.message)}</p><p class="small">This failure is being shown explicitly; it is not a zero-finding result.</p></section>`;}}
+load();
+</script>
+</body>
+</html>
