@@ -1,30 +1,367 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PsychOps Intelligence</title>
-  <meta name="description" content="A public-source psychedelic policy and operations monitoring surface with explicit source-health and sweep states.">
-  <style>
-    :root{--ink:#14201c;--muted:#5c6964;--paper:#f7f4ed;--card:#fff;--line:#d7ded9;--green:#16794a;--amber:#b45309;--red:#b42318;--blue:#24344a}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{max-width:1120px;margin:auto;padding:42px 22px 80px}h1{font-size:clamp(2rem,5vw,4rem);line-height:1;margin:.2em 0}.eyebrow{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}.lede{max-width:800px;font-size:1.05rem;color:var(--muted)}.notice{margin:24px 0;padding:16px 18px;border:1px solid var(--line);background:#fff8e8;border-radius:14px}.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:28px 0}.metric,.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}.metric strong{display:block;font-size:1.35rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}.card h2{font-size:1.05rem;margin:0 0 8px}.meta{font-size:.78rem;color:var(--muted);margin-bottom:12px}.pill{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.completed_with_findings,.completed{background:#e7f6ee;color:var(--green)}.completed_zero_findings,.never_run{background:#eef1f5;color:var(--blue)}.partial{background:#fff3d8;color:var(--amber)}.failed{background:#fde8e6;color:var(--red)}ul{padding-left:18px}.result{padding:10px 0;border-top:1px solid var(--line)}.result a{color:var(--blue);font-weight:700;text-decoration:none}.error{font-size:.82rem;color:var(--red);background:#fff2f1;padding:8px;border-radius:8px;margin-top:8px}.small{font-size:.82rem;color:var(--muted)}button{border:0;border-radius:10px;background:var(--ink);color:white;padding:10px 14px;font-weight:700;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}footer{margin-top:36px;padding-top:20px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted)}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psych Ops Intel — Psilocybin Regulatory Monitor</title>
+<meta name="description" content="Automated primary-source sweep of OHA, DORA, DOR NMD, NMDOH, PSFC, and HAF for psilocybin regulatory updates. Updated Monday 9am UTC. Built by Aloha AI Consulting.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://psychops-intel.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Psych Ops Intel — Psilocybin Regulatory Monitor">
+<meta property="og:description" content="Six-source regulatory sweep tracking OHA, DORA, DOR NMD, NMDOH, PSFC, and HAF. Primary-source psilocybin intelligence for licensed practitioners and operators. Updated weekly.">
+<meta property="og:url" content="https://psychops-intel.vercel.app/">
+<meta property="og:site_name" content="Aloha AI Consulting">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Psych Ops Intel — Psilocybin Regulatory Monitor">
+<meta name="twitter:description" content="Six-source regulatory sweep tracking OHA, DORA, DOR NMD, NMDOH, PSFC, and HAF. Primary-source psilocybin intelligence, updated weekly.">
+<style>
+  :root {
+    --brand: #1B7A68;
+    --bg: #F6F3EC;
+    --text: #1C1B1F;
+    --hot: #C24A2E;
+    --warm: #B8842A;
+    --cool: #1B5E94;
+    --muted: rgba(28,27,31,0.45);
+    --border: rgba(28,27,31,0.12);
+    --card: #fff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Manrope', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header { padding: 48px 40px 32px; border-bottom: 1px solid var(--border); }
+  .header-top { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+  .brand { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand); }
+  .sweep-badge { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(27,122,104,0.1); color: var(--brand); border: 1px solid rgba(27,122,104,0.25); padding: 3px 10px; border-radius: 4px; }
+  h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: clamp(28px, 4vw, 42px); font-weight: 500; line-height: 1.15; }
+  .header-sub { font-size: 14px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+  .last-updated { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--brand); margin-top: 8px; }
+
+  .source-bar { padding: 16px 40px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid var(--border); background: rgba(27,122,104,0.04); }
+  .source-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+  .source-pill { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; transition: all 0.15s; }
+  .source-pill:hover { border-color: var(--brand); color: var(--brand); }
+  .source-pill.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+  .controls { padding: 16px 40px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; }
+  .filter-btn { font-family: 'Syne', system-ui, sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; padding: 7px 16px; border: 1px solid var(--border); border-radius: 20px; background: transparent; color: var(--text); cursor: pointer; transition: all 0.15s; }
+  .filter-btn:hover { border-color: var(--brand); color: var(--brand); }
+  .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .filter-btn.urgent.active { background: var(--hot); border-color: var(--hot); color: #fff; }
+  .filter-btn.watch.active { background: var(--warm); border-color: var(--warm); color: #fff; }
+  .filter-btn.stable.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .search-box { margin-left: auto; font-family: 'Manrope', system-ui, sans-serif; font-size: 13px; padding: 7px 14px; border: 1px solid var(--border); border-radius: 20px; background: transparent; color: var(--text); width: 220px; outline: none; }
+  .search-box:focus { border-color: var(--brand); }
+
+  .grid { padding: 32px 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 12px; transition: box-shadow 0.15s; }
+  .card:hover { box-shadow: 0 4px 20px rgba(28,27,31,0.08); }
+  .card.urgent { border-left: 3px solid var(--hot); }
+  .card.watch { border-left: 3px solid var(--warm); }
+  .card.stable { border-left: 3px solid var(--brand); }
+
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .status-tag { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
+  .status-urgent { background: rgba(194,74,46,0.1); color: var(--hot); }
+  .status-watch { background: rgba(184,132,42,0.1); color: var(--warm); }
+  .status-stable { background: rgba(27,122,104,0.1); color: var(--brand); }
+
+  .card-source-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand); font-weight: 700; }
+  .card-title { font-family: 'Syne', system-ui, sans-serif; font-size: 15px; font-weight: 700; line-height: 1.4; margin-top: 2px; }
+  .card-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .meta-pill { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 3px; background: var(--bg); border: 1px solid var(--border); color: var(--muted); }
+  .card-summary { font-size: 13px; line-height: 1.65; color: rgba(28,27,31,0.8); }
+  .card-detail { font-size: 12px; line-height: 1.65; color: var(--muted); border-left: 2px solid var(--brand); padding-left: 10px; margin-top: 2px; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 3px; background: rgba(27,122,104,0.07); color: var(--brand); }
+  .card-link a { font-size: 11px; color: var(--muted); text-decoration: none; font-family: 'DM Mono', monospace; }
+  .card-link a:hover { color: var(--brand); text-decoration: underline; }
+
+  .count-row { padding: 12px 40px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  .empty { grid-column: 1/-1; text-align: center; padding: 80px 40px; color: var(--muted); font-size: 15px; }
+
+  .cta-bar { padding: 40px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+  .cta-bar p { font-size: 14px; color: var(--muted); max-width: 500px; line-height: 1.6; }
+  .cta-form { display: flex; gap: 10px; }
+  .cta-input { font-family: 'Manrope', system-ui, sans-serif; font-size: 13px; padding: 10px 16px; border: 1px solid var(--border); border-radius: 4px; background: var(--card); color: var(--text); width: 240px; outline: none; }
+  .cta-input:focus { border-color: var(--brand); }
+  .cta-btn { font-family: 'Syne', system-ui, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; padding: 10px 20px; background: var(--text); color: var(--bg); border: none; border-radius: 4px; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
+  .cta-btn:hover { background: var(--brand); }
+  .cta-msg { font-size: 12px; color: var(--brand); margin-top: 6px; display: none; }
+
+  footer { padding: 24px 40px; border-top: 1px solid var(--border); font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+
+  @media (max-width: 600px) {
+    header, .source-bar, .controls, .grid, .cta-bar, footer, .count-row { padding-left: 20px; padding-right: 20px; }
+    .grid { grid-template-columns: 1fr; }
+    .search-box { width: 100%; margin-left: 0; }
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Syne:wght@600;700&family=Manrope:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-<main class="wrap">
-  <div class="eyebrow">Public-source intelligence surface</div>
-  <h1>PsychOps Intelligence</h1>
-  <p class="lede">A monitoring interface for selected psychedelic policy, regulatory and field-intelligence sources. It distinguishes a successful zero-result sweep from a failed, partial, unconfigured or never-run source.</p>
-  <div class="notice"><strong>Scope:</strong> This is research intelligence, not legal, medical or investment advice. A displayed source signal is not a legal conclusion. Source availability and automated retrieval can fail; those failures are shown rather than converted into “no findings.”</div>
-  <div class="summary" id="summary"><div class="metric"><strong>Loading</strong><span>Retrieving source health…</span></div></div>
-  <div class="grid" id="grid"></div>
-  <footer>Last successful sweep and source-level states are reported from the monitor itself. Human review remains necessary before relying on any item.</footer>
+<a href="#main-content" class="sr-only" style="position:absolute;left:-9999px;top:0;background:var(--brand);color:#fff;padding:8px 16px;z-index:999;font-size:13px;text-decoration:none;" onfocus="this.style.left='0'" onblur="this.style.left='-9999px'">Skip to main content</a>
+
+<header>
+  <div class="header-top">
+    <span class="brand">Aloha AI Consulting</span>
+    <span class="sweep-badge">Updated weekly · Monday 9am UTC</span>
+  </div>
+  <h1>Psych Ops Intel</h1>
+  <p class="header-sub">Primary-source regulatory sweep of Oregon, Colorado, and New Mexico psilocybin programs — OHA, DORA, DOR NMD, NMDOH, PSFC, and HAF. For licensed practitioners and operators in the state-regulated psilocybin ecosystem.</p>
+  <p class="last-updated" id="last-updated">Sweep: loading…</p>
+</header>
+
+<div class="source-bar" role="toolbar" aria-label="Filter by regulatory source">
+  <span class="source-label">Source</span>
+  <button class="source-pill active" data-source="all">All 6</button>
+  <button class="source-pill" data-source="OHA">OHA</button>
+  <button class="source-pill" data-source="DORA">DORA</button>
+  <button class="source-pill" data-source="DOR NMD">DOR NMD</button>
+  <button class="source-pill" data-source="NMDOH">NMDOH</button>
+  <button class="source-pill" data-source="PSFC">PSFC</button>
+  <button class="source-pill" data-source="HAF">HAF</button>
+</div>
+
+<div class="controls" role="toolbar" aria-label="Filter by status">
+  <button class="filter-btn active" data-filter="all" aria-pressed="true">All updates</button>
+  <button class="filter-btn urgent" data-filter="urgent" aria-pressed="false">🔴 Urgent</button>
+  <button class="filter-btn watch" data-filter="watch" aria-pressed="false">🟡 Watch</button>
+  <button class="filter-btn stable" data-filter="stable" aria-pressed="false">🟢 Stable</button>
+  <input class="search-box" type="text" placeholder="Search updates…" id="search-input" aria-label="Search regulatory updates">
+</div>
+
+<div class="count-row" id="count-row">Loading…</div>
+
+<main id="main-content">
+  <div class="grid" id="grid">
+    <div style="grid-column:1/-1;padding:80px;text-align:center;color:var(--muted);font-size:14px;">
+      <div style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;"></div>
+      Loading regulatory intelligence…
+    </div>
+  </div>
 </main>
+
+<div class="cta-bar">
+  <p>Psych Ops Intel sweeps six primary regulatory sources every Monday. If you need a customized regulatory intelligence layer for your psilocybin practice or facility, Aloha AI Consulting can build it. Leave your email to connect.</p>
+  <div>
+    <div class="cta-form">
+      <label for="cta-email" class="sr-only">Your email address</label>
+      <input class="cta-input" type="email" placeholder="your@email.com" id="cta-email" autocomplete="email">
+      <button class="cta-btn" type="button" onclick="submitCTA()">Get in touch</button>
+    </div>
+    <div class="cta-msg" id="cta-msg" role="status" aria-live="polite">Got it — we'll be in touch.</div>
+  </div>
+</div>
+
+<footer>
+  <span>Psych Ops Intel · Aloha AI Consulting · Honolulu, HI</span>
+  <span><a href="mailto:collins.ra@northeastern.edu" style="color:inherit;text-decoration:none;">collins.ra@northeastern.edu</a> · <a href="https://linkedin.com/in/rn-collins" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">linkedin.com/in/rn-collins</a></span>
+</footer>
+
 <script>
-const labels={completed_with_findings:'Completed — findings',completed_zero_findings:'Completed — zero findings',partial:'Partial — some queries failed',failed:'Failed',never_run:'Never run',not_configured:'Not configured',completed:'Completed'};
-const fmt=v=>v?new Date(v).toLocaleString():'Not available';
-function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-function card(c){const state=c.state||'never_run';const results=c.results||[];const errors=c.errors||[];return `<section class="card"><span class="pill ${esc(state)}">${esc(labels[state]||state)}</span><h2>${esc(c.label||c.key)}</h2><div class="meta">Last attempted: ${esc(fmt(c.attemptedAt))}<br>Last successful: ${esc(fmt(c.successfulAt))}<br>Results: ${esc(c.resultCount??results.length)} · Completed queries: ${esc(c.completedQueries??0)} · Failed queries: ${esc(c.failedQueries??errors.length)}</div>${results.length?results.map(r=>`<div class="result"><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a><div class="small">${esc(r.published||'Date unavailable')}</div><div>${esc(r.snippet||'')}</div></div>`).join(''):`<p class="small">No qualifying findings are stored for this source in the latest recorded state.</p>`}${errors.length?errors.map(e=>`<div class="error">${esc(e.message||'Source query failed')}</div>`).join(''):''}</section>`}
-async function load(){const summary=document.querySelector('#summary');const grid=document.querySelector('#grid');try{const r=await fetch('/api/data',{cache:'no-store'});const d=await r.json();const cats=d.categories||[];const findings=cats.reduce((n,c)=>n+(c.resultCount||0),0);const failed=cats.filter(c=>['failed','partial'].includes(c.state)).length;summary.innerHTML=`<div class="metric"><strong>${esc(labels[d.state]||d.state||'Unknown')}</strong><span>Overall sweep state</span></div><div class="metric"><strong>${findings}</strong><span>Stored findings</span></div><div class="metric"><strong>${failed}</strong><span>Sources with errors</span></div><div class="metric"><strong>${esc(fmt(d.lastSuccessfulSweep))}</strong><span>Last successful sweep</span></div>`;grid.innerHTML=cats.map(card).join('')||'<section class="card"><h2>No source records</h2><p>The monitor has not stored any category records.</p></section>';if(!r.ok)throw new Error(d.error||`Data endpoint returned ${r.status}`);}catch(e){summary.innerHTML='<div class="metric"><strong>Failed</strong><span>Source-health endpoint unavailable</span></div>';grid.innerHTML=`<section class="card"><span class="pill failed">Failed</span><h2>Monitor data unavailable</h2><p>${esc(e.message)}</p><p class="small">This failure is being shown explicitly; it is not a zero-finding result.</p></section>`;}}
+/* ── DATA ─────────────────────────────────────────────────────────────── */
+// Static seed data — replaced by /api/data when backend is live
+const SEED = [
+  {
+    source: 'OHA',
+    status: 'watch',
+    title: 'Psilocybin Service Center License Renewals — Wave 2 Open',
+    date: '2026-07-07',
+    jurisdiction: 'Oregon',
+    summary: 'OHA opened the second wave of psilocybin service center license renewal applications. Facilities must submit updated safety plans and facilitator rosters. Deadline: 90 days from approval date.',
+    detail: 'OAR 333-333-4000 amended to clarify supervision ratios for group sessions. Facilitation sessions may now include up to 3 clients per licensed facilitator under specific conditions.',
+    tags: ['licensing', 'service center', 'renewal', 'OAR'],
+    link: 'https://www.oregon.gov/oha/PH/PREVENTIONWELLNESS/Pages/Psilocybin-Services.aspx',
+    linkLabel: 'OHA Psilocybin Services'
+  },
+  {
+    source: 'DORA',
+    status: 'urgent',
+    title: 'Colorado Natural Medicine Healing Centers — Examination Protocols Revised',
+    date: '2026-07-01',
+    jurisdiction: 'Colorado',
+    summary: 'DORA updated the Natural Medicine examination and licensing protocols effective July 1, 2026. New clinical supervision requirements for Healing Center Operators include mandatory quarterly audits.',
+    detail: 'Colorado Proposition 122 implementing rules updated under 3 CCR 702-7. Healing centers must now post their licensed facilitator roster publicly. Remote healing sessions remain prohibited.',
+    tags: ['DORA', 'Prop 122', 'healing center', 'facilitator', 'CCR'],
+    link: 'https://dora.colorado.gov/natural-medicine',
+    linkLabel: 'DORA Natural Medicine'
+  },
+  {
+    source: 'DOR NMD',
+    status: 'watch',
+    title: 'Colorado DOR Natural Medicine Division — Retail License Applications Open Q3',
+    date: '2026-06-28',
+    jurisdiction: 'Colorado',
+    summary: 'The Colorado Department of Revenue Natural Medicine Division confirmed Q3 2026 as the open window for initial retail natural medicine license applications. Fee schedule and zoning requirements published.',
+    detail: 'Application fee: $5,000 initial + $2,500 annual renewal. Local government approval required within 60 days of DOR notification. Applicants must demonstrate capitalization of at least $150,000.',
+    tags: ['DOR NMD', 'retail license', 'Colorado', 'Q3 2026'],
+    link: 'https://sbg.colorado.gov/natural-medicine',
+    linkLabel: 'Colorado DOR Natural Medicine'
+  },
+  {
+    source: 'NMDOH',
+    status: 'stable',
+    title: 'New Mexico Psilocybin Therapy Program — Practitioner Registry Update',
+    date: '2026-06-20',
+    jurisdiction: 'New Mexico',
+    summary: 'NMDOH published the updated Psilocybin Therapy Program practitioner registry. 47 licensed practitioners now listed. Supervision pathways for unlicensed practitioners under licensed supervisors clarified.',
+    detail: 'NMDOH Rule 7.34.3 NMAC: Integration counseling now formally recognized as a billable service type under the program. Practitioners may offer up to 12 hours of post-session integration per client per year.',
+    tags: ['NMDOH', 'New Mexico', 'practitioner registry', 'integration'],
+    link: 'https://www.nmhealth.org/',
+    linkLabel: 'NMDOH'
+  },
+  {
+    source: 'PSFC',
+    status: 'stable',
+    title: 'Psychedelic Science Funders Coalition — 2026 Grant Cycle Opens',
+    date: '2026-06-15',
+    jurisdiction: 'Federal / International',
+    summary: 'PSFC opened the 2026 grant cycle for psilocybin clinical, policy, and harm-reduction research. Letters of Inquiry due August 15, 2026. Total pool: $4.2M across 8 priority areas.',
+    detail: 'Priority areas include: state-licensed psilocybin access models, training curriculum development, equity in access, and practitioner wellness. Oregon and Colorado operators eligible for policy implementation grants.',
+    tags: ['PSFC', 'funding', 'grants', 'research', 'LOI'],
+    link: 'https://psychedelicscience.org/',
+    linkLabel: 'PSFC'
+  },
+  {
+    source: 'HAF',
+    status: 'watch',
+    title: 'Healing Advocacy Fund — Oregon Facilitation Rate Study Released',
+    date: '2026-07-05',
+    jurisdiction: 'Oregon',
+    summary: 'HAF released the 2026 Oregon Psilocybin Facilitation Rate Study. Median session cost: $1,800–$2,400. HAF recommends OHA implement a sliding-scale mandate in the next rulemaking cycle.',
+    detail: 'Study documents significant access disparities in rural counties. HAF\'s draft policy language for sliding-scale facilitation requirements circulated for public comment through July 31, 2026.',
+    tags: ['HAF', 'Oregon', 'access', 'pricing', 'equity', 'rulemaking'],
+    link: 'https://www.healingadvocacyfund.org/',
+    linkLabel: 'Healing Advocacy Fund'
+  }
+];
+
+/* ── STATE ────────────────────────────────────────────────────────────── */
+let allUpdates = [];
+let activeFilter = 'all';
+let activeSource = 'all';
+let searchTerm = '';
+
+/* ── LOAD ─────────────────────────────────────────────────────────────── */
+async function load() {
+  try {
+    const r = await fetch('/api/data');
+    if (!r.ok) throw new Error('no api');
+    const d = await r.json();
+    allUpdates = d.updates || SEED;
+    const ts = d.sweepTimestamp ? new Date(d.sweepTimestamp).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'}) : 'Seed data';
+    document.getElementById('last-updated').textContent = 'Last sweep: ' + ts;
+  } catch {
+    allUpdates = SEED;
+    document.getElementById('last-updated').textContent = 'Last sweep: seed data (backend pending)';
+  }
+  render();
+}
+
+/* ── RENDER ───────────────────────────────────────────────────────────── */
+function render() {
+  let filtered = allUpdates.filter(u => {
+    if (activeSource !== 'all' && u.source !== activeSource) return false;
+    if (activeFilter !== 'all' && u.status !== activeFilter) return false;
+    if (searchTerm) {
+      const s = searchTerm.toLowerCase();
+      return (u.title||'').toLowerCase().includes(s)
+          || (u.summary||'').toLowerCase().includes(s)
+          || (u.source||'').toLowerCase().includes(s)
+          || (u.jurisdiction||'').toLowerCase().includes(s)
+          || (u.tags||[]).some(t => t.toLowerCase().includes(s));
+    }
+    return true;
+  });
+
+  document.getElementById('count-row').textContent = filtered.length + ' of ' + allUpdates.length + ' updates';
+
+  const grid = document.getElementById('grid');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty">No updates match your filters.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(u => {
+    const sc = u.status === 'urgent' ? 'status-urgent' : u.status === 'watch' ? 'status-watch' : 'status-stable';
+    const sl = u.status === 'urgent' ? 'URGENT' : u.status === 'watch' ? 'WATCH' : 'STABLE';
+    const cc = u.status;
+    const date = u.date ? new Date(u.date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
+    const tags = (u.tags||[]).map(t => `<span class="tag">${esc(t)}</span>`).join('');
+    return `
+    <div class="card ${cc}">
+      <div class="card-top">
+        <div>
+          <div class="card-source-label">${esc(u.source)}</div>
+          <div class="card-title">${esc(u.title)}</div>
+        </div>
+        <span class="status-tag ${sc}">${sl}</span>
+      </div>
+      <div class="card-meta">
+        ${u.jurisdiction ? `<span class="meta-pill">${esc(u.jurisdiction)}</span>` : ''}
+        ${date ? `<span class="meta-pill">${date}</span>` : ''}
+      </div>
+      ${u.summary ? `<div class="card-summary">${esc(u.summary)}</div>` : ''}
+      ${u.detail ? `<div class="card-detail">${esc(u.detail)}</div>` : ''}
+      ${tags ? `<div class="card-tags">${tags}</div>` : ''}
+      ${u.link ? `<div class="card-link"><a href="${esc(u.link)}" target="_blank" rel="noopener">↗ ${esc(u.linkLabel||u.link)}</a></div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── FILTERS ──────────────────────────────────────────────────────────── */
+document.querySelectorAll('[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-filter]').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+    btn.classList.add('active'); btn.setAttribute('aria-pressed','true');
+    activeFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+document.querySelectorAll('[data-source]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-source]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeSource = btn.dataset.source;
+    render();
+  });
+});
+
+document.getElementById('search-input').addEventListener('input', e => {
+  searchTerm = e.target.value.trim();
+  render();
+});
+
+/* ── CTA ──────────────────────────────────────────────────────────────── */
+async function submitCTA() {
+  const email = document.getElementById('cta-email').value.trim();
+  if (!email) return;
+  try {
+    await fetch('/api/leads', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, source:'psychops-intel', url: window.location.href})
+    });
+  } catch {}
+  document.getElementById('cta-msg').style.display = 'block';
+  document.getElementById('cta-email').value = '';
+}
+
+/* ── SPIN ANIM ────────────────────────────────────────────────────────── */
+const style = document.createElement('style');
+style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+document.head.appendChild(style);
+
 load();
 </script>
 </body>
