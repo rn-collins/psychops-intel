@@ -253,8 +253,8 @@ async function load() {
     const r = await fetch('/api/data');
     if (!r.ok) throw new Error('no api');
     const d = await r.json();
-    allUpdates = d.updates || SEED;
-    const ts = d.sweepTimestamp ? new Date(d.sweepTimestamp).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'}) : 'Seed data';
+    allUpdates = d.categories?.flatMap(c => c.results || []) || SEED;
+    const ts = d.lastSuccessfulSweep ? new Date(d.lastSuccessfulSweep).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'}) : 'Seed data';
     document.getElementById('last-updated').textContent = 'Last sweep: ' + ts;
   } catch {
     allUpdates = SEED;
@@ -347,7 +347,7 @@ async function submitCTA() {
   const email = document.getElementById('cta-email').value.trim();
   if (!email) return;
   try {
-    await fetch('/api/leads', {
+    await fetch('/api/lead', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({email, source:'psychops-intel', url: window.location.href})
