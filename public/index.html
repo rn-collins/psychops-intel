@@ -354,7 +354,7 @@ async function submitCTA() {
   const email = document.getElementById('cta-email').value.trim();
   if (!email) return;
   try {
-    await fetch('/api/lead', {
+    await fetch('https://rn-api.vercel.app/api/lead', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({email, source:'psychops-intel', url: window.location.href})
@@ -405,7 +405,7 @@ load();
     document.getElementById('ca-form-psychops-intel').addEventListener('submit',function(e){
       e.preventDefault();
       var f=e.target;
-      fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},
+      fetch('https://rn-api.vercel.app/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({name:f.name.value,email:f.email.value,message:f.message.value,source:'psychops-intel'})
       }).then(function(){
         f.reset();
