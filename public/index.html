@@ -403,7 +403,7 @@ async function submitCTA() {
   if (!email) return;
   const jurisdiction = document.getElementById('cta-jurisdiction')?.value || 'all';
   try {
-    await fetch('https://rn-api.vercel.app/api/lead', {
+    await fetch('/api/lead', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({email, jurisdiction, source:'psychops-intel-alerts', url: window.location.href})
@@ -454,7 +454,7 @@ load();
     document.getElementById('ca-form-psychops-intel').addEventListener('submit',function(e){
       e.preventDefault();
       var f=e.target;
-      fetch('https://rn-api.vercel.app/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},
+      fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({name:f.name.value,email:f.email.value,message:f.message.value,source:'psychops-intel'})
       }).then(function(){
         f.reset();
@@ -464,6 +464,6 @@ load();
     </script>
   </div>
 </div>
-<div style="text-align:center;padding:12px 0;font-size:12px;color:#666;border-top:1px solid #eee;margin-top:24px">Built by <a href="https://rn-portfolio-khaki.vercel.app" style="color:#333" target="_blank" rel="noopener">RN Builds</a></div>
+<div style="text-align:center;padding:12px 0;font-size:12px;color:#666;border-top:1px solid #eee;margin-top:24px">Built by <a href="https://aloha-ai-consulting.vercel.app" style="color:#333" target="_blank" rel="noopener">Aloha AI</a>. Explore all AI tools and projects at <a href="https://rn-portfolio-khaki.vercel.app" style="color:#333" target="_blank" rel="noopener">RN Builds</a>.</div>
 </body>
 </html>
