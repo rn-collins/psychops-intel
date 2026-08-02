@@ -128,7 +128,7 @@
     <span class="sweep-badge">Updated weekly · Monday 9am UTC</span>
   </div>
   <h1>Psych Ops Intel</h1>
-  <p class="header-sub">Primary-source regulatory sweep of Oregon, Colorado, and New Mexico psilocybin programs — OHA, DORA, DOR NMD, NMDOH, PSFC, and HAF. For licensed practitioners and operators in the state-regulated psilocybin ecosystem.</p>
+  <p class="header-sub">A weekly, primary-source sweep of six regulators and funders across Oregon, Colorado, and New Mexico's psilocybin programs — built so licensed practitioners and operators catch a renewal deadline or rule change before it becomes a compliance problem.</p>
   <p class="last-updated" id="last-updated">Sweep: loading…</p>
 </header>
 
@@ -162,15 +162,40 @@
   </div>
 </main>
 
+<section style="padding:40px;border-top:1px solid var(--border)">
+  <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px">How This Monitor Works</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:28px;max-width:1100px">
+    <div>
+      <h2 style="font-family:'Syne',system-ui,sans-serif;font-size:15px;font-weight:700;margin-bottom:8px">What it tracks</h2>
+      <p style="font-size:13px;line-height:1.7;color:rgba(28,27,31,0.75)">Six primary regulatory sources across three state-legal psilocybin programs: Oregon's <strong>OHA</strong> (Oregon Health Authority, Psilocybin Services program), Colorado's <strong>DORA</strong> (Department of Regulatory Agencies, Natural Medicine licensing) and <strong>DOR NMD</strong> (Department of Revenue's Natural Medicine Division, retail licensing and tax), and New Mexico's <strong>NMDOH</strong> (Department of Health, Psilocybin Therapy Program). Two non-governmental sources round it out: <strong>PSFC</strong> (Psychedelic Science Funders Coalition, grant cycles) and <strong>HAF</strong> (Healing Advocacy Fund, Oregon-focused policy research and advocacy).</p>
+    </div>
+    <div>
+      <h2 style="font-family:'Syne',system-ui,sans-serif;font-size:15px;font-weight:700;margin-bottom:8px">Why it matters</h2>
+      <p style="font-size:13px;line-height:1.7;color:rgba(28,27,31,0.75)">Licensing rules in this space move fast and unevenly across states — renewal windows open with 90-day deadlines, supervision ratios get amended mid-cycle, and retail license applications open for a single quarter. Missing one of these updates on a primary-source agency site can mean a missed renewal or an out-of-compliance facility. This monitor exists so a practitioner or operator doesn't have to check six separate agency and nonprofit sites by hand every week.</p>
+    </div>
+    <div>
+      <h2 style="font-family:'Syne',system-ui,sans-serif;font-size:15px;font-weight:700;margin-bottom:8px">How the sweep works</h2>
+      <p style="font-size:13px;line-height:1.7;color:rgba(28,27,31,0.75)">An automated sweep checks all six sources every Monday at 9am UTC and classifies each update by urgency: <strong>🔴 Urgent</strong> means a compliance-affecting, deadline-bound change; <strong>🟡 Watch</strong> means a proposed or pending change worth tracking but not yet actionable; <strong>🟢 Stable</strong> means informational — funding, registries, research — with no action required. If a sweep fails to reach a source, the monitor falls back to the last verified dataset and labels it plainly rather than silently going stale.</p>
+    </div>
+  </div>
+</section>
+
 <div class="cta-bar">
-  <p>Psych Ops Intel sweeps six primary regulatory sources every Monday. If you need a customized regulatory intelligence layer for your psilocybin practice or facility, Aloha AI Consulting can build it. Leave your email to connect.</p>
+  <p>Get a weekly alert when something changes in your jurisdiction — pick your state below, or leave your email for the full six-source digest every Monday. Aloha AI Consulting also builds custom regulatory intelligence layers for individual psilocybin practices and facilities.</p>
   <div>
     <div class="cta-form">
+      <label for="cta-jurisdiction" class="sr-only">Your jurisdiction</label>
+      <select class="cta-input" id="cta-jurisdiction" style="width:150px">
+        <option value="all">All jurisdictions</option>
+        <option value="Oregon">Oregon</option>
+        <option value="Colorado">Colorado</option>
+        <option value="New Mexico">New Mexico</option>
+      </select>
       <label for="cta-email" class="sr-only">Your email address</label>
       <input class="cta-input" type="email" placeholder="your@email.com" id="cta-email" autocomplete="email">
-      <button class="cta-btn" type="button" onclick="submitCTA()">Get in touch</button>
+      <button class="cta-btn" type="button" onclick="submitCTA()">Subscribe to alerts</button>
     </div>
-    <div class="cta-msg" id="cta-msg" role="status" aria-live="polite">Got it — we'll be in touch.</div>
+    <div class="cta-msg" id="cta-msg" role="status" aria-live="polite">Got it — you're on the list for weekly alerts.</div>
   </div>
 </div>
 
@@ -376,11 +401,12 @@ document.getElementById('search-input').addEventListener('input', e => {
 async function submitCTA() {
   const email = document.getElementById('cta-email').value.trim();
   if (!email) return;
+  const jurisdiction = document.getElementById('cta-jurisdiction')?.value || 'all';
   try {
     await fetch('https://rn-api.vercel.app/api/lead', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({email, source:'psychops-intel', url: window.location.href})
+      body: JSON.stringify({email, jurisdiction, source:'psychops-intel-alerts', url: window.location.href})
     });
   } catch {}
   document.getElementById('cta-msg').style.display = 'block';
