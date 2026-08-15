@@ -4,30 +4,30 @@ const EXA_KEY = process.env.EXA_API_KEY;
 const SLACK = process.env.SLACK_WEBHOOK_URL;
 
 const CATEGORIES = [
-  { key: "or", label: "Oregon — OHA Psilocybin Services", queries: [
+  { key: "or", label: "Oregon — OHA Psilocybin Services", sourceClass: "official", allowedHosts: ["oregon.gov"], queries: [
     "Oregon Health Authority psilocybin services rulemaking bulletin 2026",
     "Oregon psilocybin SB 303 data collection OHA 2026",
     "Oregon psilocybin service center facilitator licensing update 2026"
   ]},
-  { key: "co", label: "Colorado — Natural Medicine Program", queries: [
+  { key: "co", label: "Colorado — Natural Medicine Program", sourceClass: "official", allowedHosts: ["colorado.gov"], queries: [
     "Colorado Department of Revenue Natural Medicine Division healing center 2026",
     "Colorado DORA psilocybin facilitator licensing natural medicine 2026",
     "Colorado Natural Medicine Advisory Board NMAB ibogaine 2026"
   ]},
-  { key: "nm", label: "New Mexico — Medical Psilocybin Act", queries: [
+  { key: "nm", label: "New Mexico — Medical Psilocybin Act", sourceClass: "official", allowedHosts: ["nmhealth.org", "nm.gov"], queries: [
     "New Mexico NMDOH medical psilocybin SB 219 advisory board 2026",
     "New Mexico psilocybin rulemaking equity fund facilitator training 2026"
   ]},
-  { key: "intel", label: "Field Intelligence — Legal & Policy", queries: [
+  { key: "intel", label: "Field Intelligence — Legal & Policy", sourceClass: "secondary", allowedHosts: [], queries: [
     "site:psychedelicalpha.com psilocybin regulation policy 2026",
     "site:vicentellp.com psychedelic psilocybin cannabis 2026",
     "Harris Sliwoski psilocybin natural medicine regulation 2026"
   ]},
-  { key: "psfc", label: "PSFC — Psychedelic Science Funders Collaborative", queries: [
+  { key: "psfc", label: "PSFC — Psychedelic Science Funders Collaborative", sourceClass: "organization", allowedHosts: [], queries: [
     "\"Psychedelic Science Funders Collaborative\" 2026",
     "PSFC psilocybin funding strategic roadmap 2026"
   ]},
-  { key: "haf", label: "HAF — Healing Advocacy Fund", queries: [
+  { key: "haf", label: "HAF — Healing Advocacy Fund", sourceClass: "organization", allowedHosts: [], queries: [
     "\"Healing Advocacy Fund\" psilocybin Oregon Colorado 2026",
     "Healing Advocacy Fund SB 303 state program 2026"
   ]}
@@ -51,7 +51,7 @@ async function redis(cmd, ...args) {
   return json;
 }
 
-async function exaSearch(query) {
+async function exaSearch(query, category) {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 30);
   const response = await fetch("https://api.exa.ai/search", {
@@ -70,11 +70,22 @@ async function exaSearch(query) {
     throw new Error(`Exa failed with ${response.status}: ${text.slice(0, 180)}`);
   }
   const json = await response.json();
-  return (json.results || []).filter(item => item.url).map(item => ({
+  return (json.results || []).filter(item => {
+    if (!item.url) return false;
+    try {
+      const host = new URL(item.url).hostname.toLowerCase().replace(/^www\./, "");
+      return !category.allowedHosts.length || category.allowedHosts.some(allowed => host === allowed || host.endsWith("." + allowed));
+    } catch {
+      return false;
+    }
+  }).map(item => ({
     title: item.title || "Untitled",
     url: item.url,
     published: item.publishedDate ? item.publishedDate.split("T")[0] : null,
-    snippet: item.text ? `${item.text.slice(0, 180).trim()}…` : ""
+    snippet: item.text ? `${item.text.slice(0, 180).trim()}…` : "",
+    sourceClass: category.sourceClass,
+    discoveredAt: new Date().toISOString(),
+    query
   }));
 }
 
@@ -93,6 +104,9 @@ async function slackAlert(text) {
 }
 
 export default async function handler(req, res) {
+  if (process.env.CRON_SECRET && req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+    return res.status(401).json({ ok: false, error: "Unauthorized" });
+  }
   const attemptedAt = new Date().toISOString();
   const summary = [];
   let total = 0;
@@ -113,7 +127,7 @@ export default async function handler(req, res) {
 
     for (const query of category.queries) {
       try {
-        const items = await exaSearch(query);
+        const items = await exaSearch(query, category);
         for (const item of items) {
           if (!seen.has(item.url)) {
             seen.add(item.url);
@@ -170,7 +184,7 @@ export default async function handler(req, res) {
   try {
     await slackAlert(
       `Psych Ops Intel Sweep — ${dateStr}\n` +
-      `${overallState.toUpperCase()} · ${total} findings · ${failures} categories with errors\n\n` +
+      `${overallState.toUpperCase()} · ${total} unreviewed source leads · ${failures} categories with errors\n\n` +
       summary.join("\n") +
       `\n\nDashboard: https://psychops-intel.vercel.app`
     );
