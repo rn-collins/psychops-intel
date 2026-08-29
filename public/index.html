@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Psych Ops Source Watch — Regulatory Intelligence</title>
-<meta name="description" content="Regulatory monitoring for state psilocybin programmes. Shows when it last collected, reports the sources it could not reach, and keeps unreviewed findings clearly separate from official pages.">
+<meta name="description" content="A source registry for state psilocybin regulation: what each monitored body actually controls, what a change there would mean, and what this monitor cannot see. Reports collection failures instead of turning them into an empty all-clear.">
 <link rel="canonical" href="https://psychops-intel.vercel.app/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta property="og:title" content="Psych Ops Source Watch">
-<meta property="og:description" content="Regulatory monitoring for state psilocybin programmes that reports collection failures instead of turning them into an empty all-clear.">
+<meta property="og:description" content="A source registry for state psilocybin regulation: what each monitored body controls, what a change there would mean, and what this monitor cannot see.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://psychops-intel.vercel.app/">
 <meta property="og:image" content="https://psychops-intel.vercel.app/og-image.png">
@@ -18,20 +18,399 @@
 <meta name="twitter:title" content="Psych Ops Source Watch">
 <meta name="twitter:image" content="https://psychops-intel.vercel.app/og-image.png">
 <style>
-:root{--ink:#10231d;--teal:#147864;--mint:#dff3eb;--sand:#f4efe4;--paper:#fffdf8;--line:#d5ddd8;--muted:#63736b;--amber:#8f5414;--red:#b5463a}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 Inter,ui-sans-serif,system-ui,sans-serif}a{color:var(--teal);text-underline-offset:3px}header{background:var(--ink);color:white;padding:3.5rem max(5vw,1.25rem)}header p{max-width:790px;color:#bed0c8}.eyebrow,.meta{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em}.eyebrow{color:#76d3bc}h1{font:600 clamp(2.2rem,6vw,4.7rem)/1 Georgia,serif;margin:.5rem 0}main{max-width:1220px;margin:auto;padding:2rem max(4vw,1rem)}.truth{border-left:4px solid var(--amber);background:#fff5e8;padding:1rem 1.2rem}.freshness{margin:1.25rem 0 0;padding:.85rem 1.1rem;border:1px solid var(--line);border-left:5px solid var(--muted);border-radius:8px;background:white;font-size:.86rem}.freshness.current{border-left-color:var(--teal)}.freshness.overdue,.freshness.failed{border-left-color:var(--red)}.freshness strong{display:block;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.75rem;margin:1.25rem 0}.metric,.source{border:1px solid var(--line);background:white;border-radius:10px;padding:1rem}.metric strong{font-size:1.7rem;display:block}.metric span{color:var(--muted);font-size:.78rem}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin:1.5rem 0}.tabs{display:flex;gap:.5rem;flex-wrap:wrap}.tabs button{border:1px solid var(--line);background:white;padding:.55rem .8rem;border-radius:6px;cursor:pointer}.tabs button.active{background:var(--teal);color:white}.stamp{color:var(--muted);font-size:.8rem}.sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:1rem}.source-head{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start}.source h2{font-size:1rem;margin:.2rem 0}.badge{font-size:.68rem;font-weight:700;padding:.25rem .5rem;border-radius:999px;background:var(--sand);white-space:nowrap}.badge.good{background:var(--mint);color:#075b48}.badge.bad{background:#fde7e4;color:var(--red)}.badge.warn{background:#fff0d8;color:var(--amber)}.official{margin:.8rem 0;padding:.75rem;background:#f2f8f5;border-radius:7px}.official strong{display:block;font-size:.78rem}.candidate{border-top:1px solid var(--line);padding:.8rem 0}.candidate h3{font-size:.92rem;margin:.2rem 0}.candidate p{font-size:.84rem;color:#46564f;margin:.3rem 0}.review{display:inline-block;color:#865122;background:#fff0d9;padding:.18rem .4rem;border-radius:3px;font-size:.65rem;font-weight:700}.empty{color:var(--muted);font-size:.84rem;border-top:1px solid var(--line);padding-top:.8rem}.error{color:var(--red);font-size:.8rem}.meta{color:var(--muted);letter-spacing:.05em}footer{max-width:1220px;margin:2rem auto;padding:1.5rem max(4vw,1rem);border-top:1px solid var(--line);color:var(--muted)}@media(max-width:550px){header{padding-top:2.4rem}.sources{grid-template-columns:1fr}.metric strong{font-size:1.35rem}}
+:root{--ink:#10231d;--teal:#0f6353;--teal-lite:#147864;--mint:#dff3eb;--sand:#f4efe4;--paper:#fffdf8;--card:#fff;--line:#c8d3cd;--line-soft:#e2e9e5;--muted:#4d5c55;--amber:#7d4910;--red:#9d3a2f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
+a{color:var(--teal);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:3px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:absolute;left:-999px;top:.5rem;background:#fff;padding:.7rem;z-index:20}
+.skip:focus{left:.5rem}
+header{background:var(--ink);color:#fff;padding:3.5rem max(5vw,1.25rem) 3rem}
+header a{color:#8fe0cb}
+header p{max-width:74ch;color:#cbdcd5}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:#76d3bc;margin:0 0 .3rem}
+h1{font:600 clamp(2.1rem,6vw,4.4rem)/1.02 Georgia,"Times New Roman",serif;margin:.3rem 0 .9rem;max-width:18ch}
+.deck{font-size:1.06rem}
+main{max-width:1180px;margin:auto;padding:2rem max(4vw,1rem) 1rem}
+h2{font:600 1.6rem/1.25 Georgia,"Times New Roman",serif;margin:2.6rem 0 .6rem}
+h2:first-of-type{margin-top:0}
+h3{font:600 1.15rem/1.3 Georgia,"Times New Roman",serif;margin:0 0 .3rem}
+h4{font-size:.71rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 .2rem;font-weight:700}
+p{margin:0 0 .8rem}
+.prose p,.prose li{max-width:74ch}
+.truth{border-left:4px solid var(--amber);background:#fdf3e5;padding:1rem 1.2rem;border-radius:0 8px 8px 0}
+.truth p:last-child{margin-bottom:0}
+.freshness{margin:1.25rem 0 0;padding:.9rem 1.1rem;border:1px solid var(--line);border-left:5px solid var(--muted);border-radius:8px;background:var(--card);font-size:.9rem}
+.freshness.current{border-left-color:var(--teal)}
+.freshness.overdue,.freshness.failed{border-left-color:var(--red)}
+.freshness strong{display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin:1.25rem 0 0}
+.metric{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:.9rem 1rem}
+.metric strong{font-size:1.65rem;display:block;font-family:Georgia,serif;color:var(--teal)}
+.metric span{color:var(--muted);font-size:.78rem}
+.nullbox{background:var(--sand);border:1px solid #ded5c2;border-radius:12px;padding:1.3rem 1.4rem}
+.nullbox ul{margin:0;padding-left:1.15rem}
+.nullbox li{margin:.4rem 0}
+.controls{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem;margin:1rem 0 1.5rem;display:grid;gap:.9rem}
+.controls .row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:.9rem}
+.controls label{display:grid;gap:.3rem;font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700;min-width:0}
+.controls input,.controls select{font:inherit;font-size:.95rem;padding:.6rem .7rem;border:1px solid #7d8c85;border-radius:7px;background:#fff;color:var(--ink);width:100%}
+.controls .bar{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.controls button{font:inherit;font-size:.88rem;font-weight:700;padding:.55rem .9rem;border-radius:7px;border:1px solid var(--teal);background:#fff;color:var(--teal);cursor:pointer}
+.controls button:hover{background:var(--mint)}
+.stamp{color:var(--muted);font-size:.8rem;margin-left:auto}
+.sources{display:grid;gap:1.1rem}
+.source{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:1.2rem 1.3rem;scroll-margin-top:1rem}
+.source:target{border-color:var(--teal);box-shadow:0 0 0 3px rgba(15,99,83,.15)}
+.source-head{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start;flex-wrap:wrap}
+.key{font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 .2rem}
+.badge{font-size:.68rem;font-weight:700;padding:.28rem .6rem;border-radius:999px;background:var(--sand);color:#584613;white-space:nowrap;letter-spacing:.04em}
+.badge.good{background:var(--mint);color:#07553f}
+.badge.bad{background:#fbe3df;color:#8a2c22}
+.badge.warn{background:#fbeeda;color:#6f400c}
+.class-tag{display:inline-block;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:.2rem .55rem;border-radius:4px;background:var(--mint);color:#07553f}
+.class-tag.secondary{background:#ece7f3;color:#43356b}
+.class-tag.organization{background:var(--sand);color:#584613}
+.official{margin:.9rem 0;padding:.8rem .9rem;background:#f1f8f5;border:1px solid var(--line-soft);border-radius:8px}
+.official h4{margin-bottom:.3rem}
+.official .meta{color:var(--muted);font-size:.8rem;margin:.25rem 0 0}
+.dossier{display:grid;gap:.8rem;margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--line-soft)}
+.dossier p{font-size:.95rem;margin:0;max-width:78ch}
+.findings{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--line-soft)}
+.candidate{border-top:1px solid var(--line-soft);padding:.85rem 0}
+.candidate:first-of-type{border-top:0;padding-top:.3rem}
+.candidate h4{text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--ink);font-weight:600;margin:.25rem 0}
+.candidate p{font-size:.87rem;color:#3e4d47;margin:.3rem 0}
+.review{display:inline-block;color:#6f400c;background:#fbeeda;padding:.16rem .42rem;border-radius:3px;font-size:.65rem;font-weight:700;letter-spacing:.05em}
+.meta{color:var(--muted);font-size:.78rem;letter-spacing:.04em}
+.empty{color:var(--muted);font-size:.87rem}
+.error{color:var(--red);font-size:.82rem}
+footer{max-width:1180px;margin:2.5rem auto 0;padding:1.6rem max(4vw,1rem) 3rem;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+@media(max-width:760px){
+  header{padding-top:2.4rem}
+  .controls .row{grid-template-columns:1fr}
+  .stamp{margin-left:0}
+  .controls button{flex:1}
+  .metric strong{font-size:1.35rem}
+}
+@media print{.controls,.skip{display:none}body{background:#fff}header{background:#fff;color:#000;padding-top:0}header p,.eyebrow{color:#333}.source{break-inside:avoid}}
 </style></head><body>
-<header><div class="eyebrow">Aloha AI Consulting · Evidence-aware operations</div><h1>Psych Ops Source Watch</h1><p>A source-verified monitoring layer for state programs and field organizations. The system separates known source endpoints from newly discovered candidates and reports collection failures instead of converting them into an empty “all clear.”</p></header>
-<main>
-<div class="truth"><strong>Decision boundary:</strong> Verified source endpoints establish where the monitor looks. Discovered items remain unreviewed candidates until a person confirms the document, date, jurisdiction, and operational consequence. This is not legal advice.</div>
+<a class="skip" href="#main">Skip to the source registry</a>
+<header>
+<p class="eyebrow">Aloha AI Consulting · Evidence-aware operations</p>
+<h1>Psych Ops Source Watch</h1>
+<p class="deck">A monitor is only as good as its account of what it is watching. This one names every source it checks, what that body actually controls, what a change there would mean, and — the part monitors usually omit — the things it cannot see at all.</p>
+</header>
+<main id="main">
+
+<div class="truth">
+<p><strong>Decision boundary.</strong> Verified source endpoints establish where this monitor looks. Discovered items remain unreviewed candidates until a person confirms the document, its date, its jurisdiction and its operational consequence. This is not legal advice.</p>
+</div>
+
 <div class="freshness" id="freshness" role="status" aria-live="polite">Checking when this last collected…</div>
-<section class="metrics" id="metrics"><div class="metric"><strong>—</strong><span>Loading source health</span></div></section>
-<div class="toolbar"><nav class="tabs" id="tabs" aria-label="Filter source categories"></nav><div class="stamp" id="stamp">Connecting to source watch…</div></div>
-<section class="sources" id="sources" aria-live="polite"></section>
+
+<section class="metrics" id="metrics" aria-label="Collection summary"><div class="metric"><strong>—</strong><span>Loading source health</span></div></section>
+<noscript><div class="truth"><p><strong>JavaScript is off.</strong> The freshness banner and the metrics above are filled in by a request to <code>/api/data</code>, so they are showing placeholders — ignore them, and treat the collection status as unknown rather than as anything. The six source profiles below are static HTML and are complete and accurate as of 29 August 2026. Only the discovered-candidate lists, the per-source collection badges and the filters need JavaScript.</p></div></noscript>
+
+<h2 id="null-results">What it means when this page is empty</h2>
+<div class="nullbox prose">
+<p>An automated sweep that finds nothing produces the most dangerous artefact in monitoring: a page that looks calm. This section exists so that calm is never mistaken for coverage.</p>
+<p><strong>A quiet sweep can mean any of five different things,</strong> and from the outside they are indistinguishable:</p>
+<ul>
+<li><strong>Nothing was published.</strong> The only one of the five that would justify reassurance.</li>
+<li><strong>Something was published and the search did not surface it.</strong> Discovery is a query against an index, and an index is neither complete nor instantaneous.</li>
+<li><strong>Something was published in a form the policy filters out.</strong> A rule change announced only in a meeting agenda PDF on an allowed host may carry none of the required terms.</li>
+<li><strong>Something changed without being published at all.</strong> A licensing pause, a staffing change, an internal interpretation: real, consequential, and invisible to any URL-based watcher.</li>
+<li><strong>The sweep did not run.</strong> Which is why the banner above reports the last <em>successful</em> collection separately from the last attempt, and says so in words rather than showing a green light.</li>
+</ul>
+<p>The correct use of this page is therefore not to read the absence of findings as an all-clear. It is to use the verified endpoints below as your starting list, and to go and look. That is also why every discovered item is labelled as an unreviewed candidate rather than as news: a search result is a lead, and a lead that has not been opened by a person establishes nothing.</p>
+</div>
+
+<h2 id="registry">The source registry</h2>
+<div class="prose">
+<p>Six endpoints, in three classes. The class matters more than it looks: an official state portal and an industry newsletter can both publish the same fact, but only one of them <em>is</em> the fact. Each profile below states what the body controls, what appears there, what a change would mean operationally, and where its blind spots are.</p>
+</div>
+
+<form class="controls" id="controls" role="search" aria-label="Filter the source registry">
+<div class="row">
+<label for="q">Search the registry<input id="q" type="search" autocomplete="off" placeholder="licensing, facilitator, rulemaking, advisory board…"></label>
+<label for="cls">Source class<select id="cls"><option value="">All classes</option><option value="official">Official state programme</option><option value="organization">Field organisation</option><option value="secondary">Secondary trade press</option></select></label>
+<label for="sortby">Order<select id="sortby"><option value="registry">Registry order</option><option value="label">Name A–Z</option><option value="class">Source class</option></select></label>
+</div>
+<div class="bar">
+<button type="submit">Apply</button>
+<button type="button" id="clear">Clear</button>
+<button type="button" id="share" hidden>Copy link to this view</button>
+<span class="meta" id="count" role="status" aria-live="polite">6 of 6 sources shown</span>
+<span class="stamp" id="stamp">Connecting to source watch…</span>
+</div>
+<noscript><p class="meta">Filtering and the freshness banner need JavaScript. All six source profiles are printed in full below either way.</p></noscript>
+</form>
+
+<section class="sources" id="sources">
+
+<article class="source" id="or" data-key="or" data-class="official" data-label="Oregon — OHA Psilocybin Services" data-text="oregon oha psilocybin services ors 475a measure 109 licensing facilitator service center manufacturer data dashboard annual report public health division center for health protection">
+<div class="source-head">
+<div><p class="key">or · official state programme</p><h3>Oregon — Oregon Psilocybin Services, Oregon Health Authority</h3><p class="meta"><span class="class-tag">Official</span> allowed host: oregon.gov</p></div>
+<span class="badge" data-state-badge>State pending</span>
+</div>
+<div class="official">
+<h4>Verified monitored endpoint</h4>
+<a href="https://www.oregon.gov/oha/ph/preventionwellness/pages/oregon-psilocybin-services.aspx" rel="noopener noreferrer">Oregon Psilocybin Services — official programme portal</a>
+<p class="meta">Oregon Health Authority · verified 17 August 2026 · read again 29 August 2026</p>
+</div>
+<div class="dossier">
+<div><h4>What this body is</h4><p>Oregon Psilocybin Services is a section inside the Oregon Health Authority’s Public Health Division, Center for Health Protection. It is not an advisory body and not a trade association: it issues the licences.</p></div>
+<div><h4>What it controls</h4><p>It implements Ballot Measure 109, passed in November 2020 and codified as ORS 475A, which directs the Authority to license and regulate the manufacture, transport, delivery, sale and purchase of psilocybin products and the provision of psilocybin services. Licensing applications opened on 2 January 2023 and the first service centres opened to clients in the summer of 2023 — so unlike the other two states in this registry, Oregon is a programme with an operating history rather than a rulemaking calendar.</p></div>
+<div><h4>What appears here</h4><p>Programme news, annual reports, quarterly newsletters, a data dashboard, and a licensee directory limited to those licensees who consented to be listed publicly.</p></div>
+<div><h4>Why a change here matters</h4><p>This is the oldest regulated market of its kind, which makes it the field’s reference implementation. A rule or fee change in Oregon is read across the country as a precedent, and anyone operating in Colorado or New Mexico will see the argument arrive there within a cycle.</p></div>
+<div><h4>What this monitor cannot see</h4><p>The licensee directory is opt-in, so it is a floor on the number of operating licensees and never a census. Individual licensing actions, inspections and enforcement do not appear on this portal at all. And each licensed service centre manages its own operations and client communication, so the state page is silent about the thing most people actually want to know.</p></div>
+</div>
+<div class="findings" data-findings></div>
+</article>
+
+<article class="source" id="co" data-key="co" data-class="official" data-label="Colorado — Natural Medicine Program" data-text="colorado dpo dora natural medicine proposition 122 healing center facilitator clinical facilitator continuing education rule 5.4 advisory board stakeholder meeting licensing">
+<div class="source-head">
+<div><p class="key">co · official state programme</p><h3>Colorado — Natural Medicine Program, Division of Professions and Occupations</h3><p class="meta"><span class="class-tag">Official</span> allowed host: colorado.gov</p></div>
+<span class="badge" data-state-badge>State pending</span>
+</div>
+<div class="official">
+<h4>Verified monitored endpoint</h4>
+<a href="https://dpo.colorado.gov/NaturalMedicine" rel="noopener noreferrer">Colorado Natural Medicine Program — official portal</a>
+<p class="meta">Colorado Division of Professions and Occupations · verified 17 August 2026 · read again 29 August 2026</p>
+</div>
+<div class="dossier">
+<div><h4>What this body is</h4><p>The Division of Professions and Occupations, inside the Department of Regulatory Agencies, running the Natural Medicine Program under a named programme director. Colorado splits the work: this Division credentials the <em>people</em>, while a separate Natural Medicine Division at the Department of Revenue handles the product side, and CDPHE runs inspection and certification.</p></div>
+<div><h4>What it controls</h4><p>Licensure and discipline for Natural Medicine Facilitators and Clinical Facilitators, the rules that govern them, continuing-education requirements, and the public licensee lookup and discipline list. The programme sits under the Natural Medicine Health Act, passed by voters in 2022 as Proposition 122.</p></div>
+<div><h4>What appears here</h4><p>Public notices, draft rules, stakeholder-meeting materials and recordings, Natural Medicine Advisory Board minutes, and the licensing forms. As of this reading, the most recent public notice was a stakeholder meeting on 20 August 2026 on proposed revisions to Rule 5.4, the continuing-education requirements for facilitators and clinical facilitators.</p></div>
+<div><h4>Why a change here matters</h4><p>Colorado publishes its rulemaking in the open, with draft rules, written comment and recordings posted before adoption. That makes this the one endpoint in the registry where a practitioner can see a change coming rather than learn about it after the fact — and it makes a quiet week here genuinely informative in a way a quiet week elsewhere is not.</p></div>
+<div><h4>What this monitor cannot see</h4><p>The split architecture is the blind spot. Watching this page catches nothing that happens at the Department of Revenue’s Natural Medicine Division or at CDPHE, and a licensee whose product supply or facility certification changes will feel it exactly as much as a rule change here.</p></div>
+</div>
+<div class="findings" data-findings></div>
+</article>
+
+<article class="source" id="nm" data-key="nm" data-class="official" data-label="New Mexico — Medical Psilocybin Program" data-text="new mexico department of health medical psilocybin act senate bill 219 sb219 advisory board rulemaking treatment resistant depression ptsd substance use end of life 2026 implementation">
+<div class="source-head">
+<div><p class="key">nm · official state programme</p><h3>New Mexico — Medical Psilocybin Program, Department of Health</h3><p class="meta"><span class="class-tag">Official</span> allowed hosts: nmhealth.org, nm.gov</p></div>
+<span class="badge" data-state-badge>State pending</span>
+</div>
+<div class="official">
+<h4>Verified monitored endpoint</h4>
+<a href="https://www.nmhealth.org/about/mcpp/mpp/" rel="noopener noreferrer">New Mexico Medical Psilocybin Program — official portal</a>
+<p class="meta">New Mexico Department of Health · verified 17 August 2026 · read again 29 August 2026</p>
+</div>
+<div class="dossier">
+<div><h4>What this body is</h4><p>The Department of Health’s Center for Medical Cannabis and Psilocybin, standing up a programme that does not yet exist operationally. Alone among the three states here, New Mexico is pre-launch — which changes what the page is for.</p></div>
+<div><h4>What it controls</h4><p>Implementation of Senate Bill 219, the Medical Psilocybin Act, signed by Governor Michelle Lujan Grisham in April 2025 and effective 20 June 2025. The Act establishes a regulated programme for medical psilocybin use for qualified conditions — the Department names major treatment-resistant depression, PTSD, substance use disorders and end-of-life care — with implementation set for 31 December 2026. A Medical Psilocybin Advisory Board assists the Department.</p></div>
+<div><h4>What appears here</h4><p>Rulemaking notices, advisory-board information, statutes and regulations, a patient-facing FAQ in English and Spanish, and announcements about public hearings and consultations.</p></div>
+<div><h4>Why a change here matters</h4><p>This is the only jurisdiction in the registry with a statutory deadline attached to it. The distance between the Department’s published progress and 31 December 2026 is itself the signal: it is the one place where the absence of an update is substantive news rather than background quiet.</p></div>
+<div><h4>What this monitor cannot see</h4><p>A programme in rulemaking generates most of its consequential decisions in advisory-board discussion, draft protocols, training requirements and data-collection design — much of which surfaces at hearings before it surfaces on a web page, if it surfaces at all. Nothing about the medical-cannabis side of the same Center is captured here either, despite the shared administrative home.</p></div>
+</div>
+<div class="findings" data-findings></div>
+</article>
+
+<article class="source" id="intel" data-key="intel" data-class="secondary" data-label="Field Intelligence — Legal &amp; Policy" data-text="psychedelic alpha vicente harris sliwoski legal policy tracker analysis trade press secondary source commercial commentary">
+<div class="source-head">
+<div><p class="key">intel · secondary trade press</p><h3>Field Intelligence — legal and policy trackers</h3><p class="meta"><span class="class-tag secondary">Secondary</span> allowed hosts: psychedelicalpha.com, vicentellp.com, harris-sliwoski.com</p></div>
+<span class="badge" data-state-badge>State pending</span>
+</div>
+<div class="official">
+<h4>Verified monitored endpoint</h4>
+<a href="https://psychedelicalpha.com/" rel="noopener noreferrer">Psychedelic Alpha — policy and regulation tracker</a>
+<p class="meta">Psychedelic Alpha · verified 17 August 2026 · read again 29 August 2026</p>
+</div>
+<div class="dossier">
+<div><h4>What this body is</h4><p>An independent trade publication covering the development, regulation and commercialisation of psychedelic medicines, with a stated mission of bringing clarity, rigour and context to the field. It runs a free stream of analysis and interviews alongside a premium subscription and advisory services. The other two allowed hosts are law-firm publications.</p></div>
+<div><h4>What it controls</h4><p>Nothing. That is the point of the class distinction. This endpoint controls no licence, issues no rule and binds no one; it reports, aggregates and interprets. Its recent output is representative — clinical-trial readouts, an agency request-for-information, a company financing — none of which is a regulatory act.</p></div>
+<div><h4>What appears here</h4><p>Analysis, interviews and scoops, typically ahead of official confirmation and often about things no official portal will ever mention: financings, personnel moves, trial results and the internal politics of the field.</p></div>
+<div><h4>Why a change here matters</h4><p>Speed. A secondary source will usually carry a development first, which makes this class useful as an early warning and useless as an authority. The correct workflow is to treat an item here as a prompt to check the relevant official endpoint, never as a substitute for having checked it.</p></div>
+<div><h4>What this monitor cannot see, and what to distrust</h4><p>Two law firms are among the allowed hosts, and law-firm commentary is written partly to demonstrate expertise to prospective clients. It is frequently excellent and it is never disinterested. Some of the publication’s substantive work also sits behind a paid tier this monitor does not reach, so what surfaces here is the free surface of a larger body of reporting.</p></div>
+</div>
+<div class="findings" data-findings></div>
+</article>
+
+<article class="source" id="psfc" data-key="psfc" data-class="organization" data-label="PSFC — Psychedelic Science Funders Collaborative" data-text="psfc psychedelic science funders collaborative philanthropy funders membership due diligence issue briefs newsletter 2017">
+<div class="source-head">
+<div><p class="key">psfc · field organisation</p><h3>Psychedelic Science Funders Collaborative</h3><p class="meta"><span class="class-tag organization">Organisation</span> allowed host: psfc.co</p></div>
+<span class="badge" data-state-badge>State pending</span>
+</div>
+<div class="official">
+<h4>Verified monitored endpoint</h4>
+<a href="https://psfc.co/" rel="noopener noreferrer">Psychedelic Science Funders Collaborative — official site</a>
+<p class="meta">Psychedelic Science Funders Collaborative · verified 17 August 2026 · read again 29 August 2026</p>
+</div>
+<div class="dossier">
+<div><h4>What this body is</h4><p>A membership community of philanthropists, founded in 2017, that coordinates giving into the psychedelic field. It states plainly that it is not a foundation and not a grantmaker: it supports members in directing their own resources, with staff providing field knowledge, due diligence and strategic guidance.</p></div>
+<div><h4>What it controls</h4><p>No rule and no licence — but money, indirectly, which in a field this dependent on philanthropy is a form of control that no state portal reports. Where coordinated funders decide the gap is determines which organisations exist in eighteen months.</p></div>
+<div><h4>What appears here</h4><p>A quarterly newsletter, issue briefs, and membership and event information. This is deliberately low-volume; it is a community page, not a newsroom.</p></div>
+<div><h4>Why a change here matters</h4><p>It is a leading indicator on the funding side. A shift in stated priorities here precedes the organisational changes that eventually become visible as new programmes, new advocacy campaigns, or organisations quietly closing.</p></div>
+<div><h4>What this monitor cannot see</h4><p>Nearly everything that matters. Grant decisions, member identities, the listserv and the pulse calls are all member-facing. What is public is the framing, not the flow of funds. Treat any signal from this endpoint as directional at best.</p></div>
+</div>
+<div class="findings" data-findings></div>
+</article>
+
+<article class="source" id="haf" data-key="haf" data-class="organization" data-label="HAF — Healing Advocacy Fund" data-text="healing advocacy fund haf 501c3 nonprofit oregon colorado psilocybin services implementation advocacy newsletter proposition 122 natural medicine health act">
+<div class="source-head">
+<div><p class="key">haf · field organisation</p><h3>Healing Advocacy Fund</h3><p class="meta"><span class="class-tag organization">Organisation</span> allowed host: healingadvocacyfund.org</p></div>
+<span class="badge" data-state-badge>State pending</span>
+</div>
+<div class="official">
+<h4>Verified monitored endpoint</h4>
+<a href="https://healingadvocacyfund.org/" rel="noopener noreferrer">Healing Advocacy Fund — official site</a>
+<p class="meta">Healing Advocacy Fund · verified 17 August 2026 · read again 29 August 2026</p>
+</div>
+<div class="dossier">
+<div><h4>What this body is</h4><p>A 501(c)(3) non-profit whose stated purpose is to expand and protect safe, affordable, state-regulated access to psychedelic healing. Its work is concentrated on the two states that have operating or launching programmes: Oregon, where voters approved the first psilocybin therapy programme in 2020 and it launched in 2023, and Colorado, under Proposition 122 and the Natural Medicine Health Act.</p></div>
+<div><h4>What it controls</h4><p>No rule and no licence. It is an advocacy organisation, and its published material is written to advance a position — which is a reason to read it, and a reason never to cite it as a finding.</p></div>
+<div><h4>What appears here</h4><p>State-programme explainers, implementation-priority updates, research summaries, and a newsletter focused on Oregon psilocybin services.</p></div>
+<div><h4>Why a change here matters</h4><p>Advocacy organisations tend to publish about a rule change before a state agency finalises one, because affecting the outcome is the objective. Movement here is often the earliest visible sign that something is being contested — the contest itself, not its result.</p></div>
+<div><h4>What this monitor cannot see, and what to distrust</h4><p>An advocacy organisation reports the developments that support its position; silence here is not evidence that nothing happened. Its characterisation of clinical evidence is a summary written for persuasion, and any claim about efficacy taken from this endpoint should be traced to the underlying study before it is repeated.</p></div>
+</div>
+<div class="findings" data-findings></div>
+</article>
+
+</section>
+
+<p class="empty" id="no-sources" hidden>No source in the registry matches those filters.</p>
+
 </main>
-<footer>Maintained by RN Collins · Companion to the <a href="https://psych-ops-directory.vercel.app/">Psych Ops Directory</a> · Source policy reviewed 17 August 2026</footer>
+<footer>
+<p>Maintained by RN Collins · Companion to the <a href="https://psych-ops-directory.vercel.app/">Psych Ops Directory</a> · Source policy reviewed 17 August 2026 · Every profile above re-read against its endpoint on 29 August 2026.</p>
+</footer>
 <script>
-let data,active='all';const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const safe=u=>{try{const x=new URL(u);return x.protocol==='https:'?x.href:null}catch{return null}};const fmt=s=>s?new Date(s).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}):'Never';
-function badge(state,stale){if(state==='failed'||state==='never_run')return['bad',state==='never_run'?'NEVER RUN':'FAILED'];if(state==='partial')return['warn','PARTIAL'];if(stale)return['warn','NOT RECHECKED'];if(state==='completed_zero_findings')return['good','NO NEW FINDINGS'];return['good','COLLECTED']}
-function render(){const cats=(data.categories||[]);document.getElementById('tabs').innerHTML=['all',...cats.map(c=>c.key)].map(k=>'<button class="'+(k===active?'active':'')+'" data-key="'+k+'">'+(k==='all'?'All source classes':esc((cats.find(c=>c.key===k)?.label||k).split(' — ')[0]))+'</button>').join('');document.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>{active=b.dataset.key;render()});const shown=cats.filter(c=>active==='all'||c.key===active);document.getElementById('sources').innerHTML=shown.map(c=>{const b=badge(c.state,(data.sourceHealth||{}).stale),official=(c.monitoredSources||[])[0],errs=(c.errors||[]).map(e=>'<div class="error">Query failure: '+esc(e.message)+'</div>').join('');const items=(c.results||[]).map(r=>{const u=safe(r.url);return '<article class="candidate"><span class="review">POLICY-SCREENED · UNREVIEWED</span><h3>'+(u?'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(r.title)+'</a>':esc(r.title))+'</h3><p>'+esc(r.snippet||'No excerpt supplied; inspect the source directly.')+'</p><div class="meta">'+esc(r.published||'Publication date unavailable')+'</div></article>'}).join('');return '<article class="source"><div class="source-head"><div><div class="meta">'+esc(c.key)+' · '+esc(c.resultCount||0)+' candidates</div><h2>'+esc(c.label)+'</h2></div><span class="badge '+b[0]+'">'+b[1]+'</span></div>'+(official?'<div class="official"><strong>VERIFIED MONITORED ENDPOINT</strong><a href="'+esc(official.url)+'" target="_blank" rel="noopener noreferrer">'+esc(official.title)+'</a><div class="meta">'+esc(official.authority)+' · verified '+esc(official.verifiedAt)+'</div></div>':'')+(c.stale?'<div class="badge warn">Retained candidates — no new qualifying items this run</div>':'')+errs+(items||'<div class="empty">No policy-qualified candidates from this sweep. That is not evidence that nothing changed; use the verified endpoint above.</div>')+'</article>'}).join('')}
-fetch('/api/data',{headers:{accept:'application/json'}}).then(r=>r.json().then(j=>{if(!r.ok)throw j;return j})).then(d=>{data=d;const h=d.sourceHealth||{};document.getElementById('metrics').innerHTML=[['Official pages watched',h.verifiedSourceCount],['Categories collecting',h.healthy],['Not collecting',(h.degraded||0)+(h.failed||0)],['Findings awaiting review',h.candidateCount],['Off-policy results filtered',h.rejectedNoiseCount]].map(x=>'<div class="metric"><strong>'+esc(x[1]??0)+'</strong><span>'+x[0]+'</span></div>').join('');const fb=document.getElementById('freshness');const st=h.stale?'overdue':'current';fb.classList.add(st);const age=h.ageDays!=null?h.ageDays+' day'+(h.ageDays===1?'':'s')+' ago':null;fb.innerHTML='<strong>'+(h.stale?'Collection is overdue':'Collection is up to date')+'</strong>'+esc(d.lastSuccessfulSweep?'Last completed collection '+fmt(d.lastSuccessfulSweep)+(age?' ('+age+').':'.'):'No collection has completed yet.')+' '+esc(h.cadence||'Weekly cadence.')+(h.newestItemDate?' Newest finding is dated '+esc(h.newestItemDate)+'.':'')+(h.stale?' Nothing below has been rechecked since then, so this is not a current picture of these programmes — open the official pages directly.':'');document.getElementById('stamp').textContent='Last collected: '+fmt(d.lastSuccessfulSweep)+' · Last attempt: '+fmt(d.lastAttempt);render()}).catch(()=>{document.getElementById('metrics').innerHTML='<div class="metric"><strong>Offline</strong><span>Source-watch data unavailable</span></div>';document.getElementById('sources').innerHTML='<div class="truth">No fallback claims are shown. Consult the responsible agency directly and retry later.</div>';const fb=document.getElementById('freshness');fb.classList.add('failed');fb.innerHTML='<strong>Cannot confirm freshness</strong>The monitor did not respond, so this page cannot say when it last collected. Do not treat anything here as current.';document.getElementById('stamp').textContent='Monitor unavailable'});
+(function () {
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
+  var safe = function (u) { try { var x = new URL(u); return x.protocol === 'https:' ? x.href : null; } catch (e) { return null; } };
+  var fmt = function (s) { return s ? new Date(s).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'Never'; };
+  var byId = function (id) { return document.getElementById(id); };
+
+  var articles = Array.prototype.slice.call(document.querySelectorAll('.source'));
+  var container = byId('sources');
+  var controls = { q: byId('q'), cls: byId('cls'), sortby: byId('sortby') };
+  var count = byId('count');
+  var none = byId('no-sources');
+  var registryOrder = articles.map(function (a) { return a.dataset.key; });
+
+  function writeUrl() {
+    var params = new URLSearchParams();
+    if (controls.q.value) params.set('q', controls.q.value);
+    if (controls.cls.value) params.set('cls', controls.cls.value);
+    if (controls.sortby.value && controls.sortby.value !== 'registry') params.set('sort', controls.sortby.value);
+    var query = params.toString();
+    history.replaceState(null, '', (query ? '?' + query : location.pathname) + location.hash);
+  }
+
+  function apply() {
+    var q = controls.q.value.trim().toLowerCase();
+    var shown = 0;
+    articles.forEach(function (node) {
+      var hay = node.dataset.text + ' ' + node.dataset.label.toLowerCase() + ' ' + node.textContent.toLowerCase();
+      var ok = (!q || hay.indexOf(q) !== -1) && (!controls.cls.value || node.dataset.class === controls.cls.value);
+      node.hidden = !ok;
+      if (ok) shown += 1;
+    });
+    var order = controls.sortby.value;
+    articles.slice().sort(function (a, b) {
+      if (order === 'label') return a.dataset.label.localeCompare(b.dataset.label);
+      if (order === 'class') return a.dataset.class.localeCompare(b.dataset.class) || a.dataset.label.localeCompare(b.dataset.label);
+      return registryOrder.indexOf(a.dataset.key) - registryOrder.indexOf(b.dataset.key);
+    }).forEach(function (node) { container.appendChild(node); });
+    count.textContent = shown + ' of ' + articles.length + ' sources shown';
+    none.hidden = shown !== 0;
+    writeUrl();
+  }
+
+  byId('controls').addEventListener('submit', function (e) { e.preventDefault(); apply(); });
+  controls.q.addEventListener('input', apply);
+  controls.cls.addEventListener('change', apply);
+  controls.sortby.addEventListener('change', apply);
+  byId('clear').addEventListener('click', function () {
+    controls.q.value = ''; controls.cls.value = ''; controls.sortby.value = 'registry'; apply();
+  });
+  var share = byId('share');
+  if (navigator.clipboard) {
+    share.hidden = false;
+    share.addEventListener('click', function () {
+      navigator.clipboard.writeText(location.href).then(function () { count.textContent = 'Link to this view copied.'; });
+    });
+  }
+
+  var params = new URLSearchParams(location.search);
+  if (params.get('q')) controls.q.value = params.get('q');
+  if (params.get('cls')) controls.cls.value = params.get('cls');
+  if (params.get('sort')) controls.sortby.value = params.get('sort');
+  apply();
+  if (location.hash) {
+    var target = document.querySelector(location.hash);
+    if (target && target.hidden) byId('clear').click();
+    if (target) target.scrollIntoView();
+  }
+
+  function badgeFor(state, stale) {
+    if (state === 'failed' || state === 'never_run') return ['bad', state === 'never_run' ? 'NEVER RUN' : 'COLLECTION FAILED'];
+    if (state === 'partial') return ['warn', 'PARTIAL COLLECTION'];
+    if (stale) return ['warn', 'NOT RECHECKED'];
+    if (state === 'completed_zero_findings') return ['good', 'NO NEW FINDINGS'];
+    return ['good', 'COLLECTED'];
+  }
+
+  fetch('/api/data', { headers: { accept: 'application/json' } })
+    .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw j; return j; }); })
+    .then(function (d) {
+      var h = d.sourceHealth || {};
+      byId('metrics').innerHTML = [
+        ['Official pages watched', h.verifiedSourceCount],
+        ['Source classes collecting', h.healthy],
+        ['Not collecting', (h.degraded || 0) + (h.failed || 0)],
+        ['Findings awaiting review', h.candidateCount],
+        ['Off-policy results filtered', h.rejectedNoiseCount]
+      ].map(function (x) { return '<div class="metric"><strong>' + esc(x[1] == null ? 0 : x[1]) + '</strong><span>' + x[0] + '</span></div>'; }).join('');
+
+      var fb = byId('freshness');
+      fb.classList.add(h.stale ? 'overdue' : 'current');
+      var age = h.ageDays != null ? h.ageDays + ' day' + (h.ageDays === 1 ? '' : 's') + ' ago' : null;
+      fb.innerHTML = '<strong>' + (h.stale ? 'Collection is overdue' : 'Collection is up to date') + '</strong>'
+        + esc(d.lastSuccessfulSweep ? 'Last completed collection ' + fmt(d.lastSuccessfulSweep) + (age ? ' (' + age + ').' : '.') : 'No collection has completed yet.')
+        + ' ' + esc(h.cadence || 'Weekly cadence.')
+        + (h.newestItemDate ? ' Newest finding is dated ' + esc(h.newestItemDate) + '.' : '')
+        + (h.stale ? ' Nothing below has been rechecked since then, so this is not a current picture of these programmes — open the official endpoints directly.' : '');
+      byId('stamp').textContent = 'Last collected: ' + fmt(d.lastSuccessfulSweep) + ' · Last attempt: ' + fmt(d.lastAttempt);
+
+      (d.categories || []).forEach(function (c) {
+        var article = document.getElementById(c.key);
+        if (!article) return;
+        var badge = article.querySelector('[data-state-badge]');
+        var pair = badgeFor(c.state, h.stale);
+        badge.className = 'badge ' + pair[0];
+        badge.textContent = pair[1];
+        var errors = (c.errors || []).map(function (e) { return '<p class="error">Query failure: ' + esc(e.message) + '</p>'; }).join('');
+        var items = (c.results || []).map(function (r) {
+          var u = safe(r.url);
+          return '<article class="candidate"><span class="review">POLICY-SCREENED · UNREVIEWED</span>'
+            + '<h4>' + (u ? '<a href="' + esc(u) + '" rel="noopener noreferrer">' + esc(r.title) + '</a>' : esc(r.title)) + '</h4>'
+            + '<p>' + esc(r.snippet || 'No excerpt supplied; inspect the source directly.') + '</p>'
+            + '<p class="meta">' + esc(r.published || 'Publication date unavailable') + '</p></article>';
+        }).join('');
+        article.querySelector('[data-findings]').innerHTML =
+          '<h4>Discovered candidates — ' + esc(c.resultCount || 0) + '</h4>'
+          + (c.stale ? '<p class="meta">Retained candidates; no new qualifying items in the most recent run.</p>' : '')
+          + errors
+          + (items || '<p class="empty">No policy-qualified candidates from this sweep. Read that against the five explanations above — it is not evidence that nothing changed.</p>');
+      });
+    })
+    .catch(function () {
+      byId('metrics').innerHTML = '<div class="metric"><strong>Offline</strong><span>Source-watch data unavailable</span></div>';
+      var fb = byId('freshness');
+      fb.classList.add('failed');
+      fb.innerHTML = '<strong>Cannot confirm freshness</strong>The monitor did not respond, so this page cannot say when it last collected. The source profiles below are static and remain accurate as of 29 August 2026, but do not treat any collection status as current.';
+      byId('stamp').textContent = 'Monitor unavailable';
+      Array.prototype.forEach.call(document.querySelectorAll('[data-findings]'), function (node) {
+        node.innerHTML = '<p class="empty">Candidate list unavailable. Consult the verified endpoint above directly.</p>';
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('[data-state-badge]'), function (node) {
+        node.className = 'badge bad'; node.textContent = 'STATUS UNKNOWN';
+      });
+    });
+})();
 </script></body></html>
