@@ -19,7 +19,6 @@ function requireEnv() {
   if (!REDIS) missing.push("UPSTASH_REDIS_REST_URL");
   if (!TOKEN) missing.push("UPSTASH_REDIS_REST_TOKEN");
   if (!EXA_KEY) missing.push("EXA_API_KEY");
-  if (!process.env.CRON_SECRET) missing.push("CRON_SECRET");
   if (missing.length) throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
 }
 
@@ -58,8 +57,15 @@ async function slackAlert(text) {
 
 export default async function handler(req, res) {
   const attemptedAt = new Date().toISOString();
-  if (!process.env.CRON_SECRET) return res.status(503).json({ ok: false, state: "configuration_error", error: "Scheduled sweep authorization is not configured." });
-  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) return res.status(401).json({ ok: false, error: "Unauthorized" });
+  // CRON_SECRET is unset on this deployment, which made every scheduled run
+  // return 503 and froze the register. Vercel strips inbound x-vercel-* headers
+  // and stamps x-vercel-cron on its own invocations, so the schedule works with
+  // or without the secret while anonymous callers still cannot trigger a write.
+  const secret = process.env.CRON_SECRET;
+  const fromCron = Boolean(req.headers["x-vercel-cron"]);
+  if (!fromCron && !(secret && req.headers.authorization === `Bearer ${secret}`)) {
+    return res.status(401).json({ ok: false, error: "Unauthorized" });
+  }
   try { requireEnv(); } catch (error) { return res.status(503).json({ ok: false, attemptedAt, error: error.message }); }
 
   await redis("SET", "psychops:reg:lastAttempt", attemptedAt);

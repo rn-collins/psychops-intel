@@ -1,5 +1,9 @@
 import { KEYS, POLICIES, validateCandidate, monitoredSource } from "./source-policy.js";
 
+// The sweep runs weekly. Past two cycles it is overdue, and the page must say so
+// rather than presenting a frozen snapshot as the current picture.
+const STALE_AFTER_MS = 14 * 24 * 60 * 60 * 1000;
+
 const REDIS = process.env.UPSTASH_REDIS_REST_URL;
 const TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
@@ -16,7 +20,7 @@ async function category(key) {
   const raw = await redisGet(`psychops:reg:${key}`);
   const base = raw ? JSON.parse(raw) : { key, state: "never_run", results: [], errors: [], attemptedAt: null, successfulAt: null };
   const stored = base.results || [];
-  const candidates = stored.filter(item => validateCandidate(item, key).accepted).map(item => ({
+  const candidates = stored.filter(item => validateCandidate(item, key, { stored: true }).accepted).map(item => ({
     ...item, recordType: "discovered_candidate", validation: "policy_screened_unreviewed", snippet: (item.snippet || "").slice(0, 180)
   }));
   return {
@@ -41,7 +45,16 @@ export default async function handler(req, res) {
       redisGet("psychops:reg:lastSuccessfulSweep"),
       redisGet("psychops:reg:lastSweepState")
     ]);
+    const ageMs = lastSuccessfulSweep ? Date.now() - new Date(lastSuccessfulSweep).getTime() : null;
+    const stale = !lastSuccessfulSweep || !Number.isFinite(ageMs) || ageMs > STALE_AFTER_MS;
+    const newestItem = categories
+      .flatMap(c => (c.results || []).map(r => r.published))
+      .filter(Boolean).sort().pop() || null;
     const sourceHealth = {
+      stale,
+      ageDays: Number.isFinite(ageMs) ? Math.round(ageMs / 86400000) : null,
+      cadence: "Weekly · Mondays 09:00 UTC",
+      newestItemDate: newestItem,
       healthy: categories.filter(c => ["completed_with_findings", "completed_zero_findings"].includes(c.state)).length,
       degraded: categories.filter(c => c.state === "partial").length,
       failed: categories.filter(c => ["failed", "never_run"].includes(c.state)).length,
@@ -53,7 +66,7 @@ export default async function handler(req, res) {
   } catch (error) {
     res.status(503).json({
       ok: false, state: "failed", error: "Source-watch data is temporarily unavailable.", lastAttempt: null, lastSuccessfulSweep: null,
-      sourceHealth: { healthy: 0, degraded: 0, failed: KEYS.length, candidateCount: 0, rejectedNoiseCount: 0, verifiedSourceCount: KEYS.length },
+      sourceHealth: { stale: true, ageDays: null, cadence: "Weekly · Mondays 09:00 UTC", newestItemDate: null, healthy: 0, degraded: 0, failed: KEYS.length, candidateCount: 0, rejectedNoiseCount: 0, verifiedSourceCount: KEYS.length },
       categories: KEYS.map(key => ({ key, label: POLICIES[key].label, state: "failed", resultCount: 0, results: [], monitoredSources: [monitoredSource(key)], attemptedAt: null, successfulAt: null, errors: [{ message: "Data source unavailable" }] }))
     });
   }

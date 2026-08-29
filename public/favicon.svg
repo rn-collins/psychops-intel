@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Psych Ops Source Watch">
+<rect width="64" height="64" rx="14" fill="#147864"/>
+<circle cx="32" cy="32" r="15" fill="none" stroke="#fffdf8" stroke-width="4"/>
+<path d="M32 17v15l10 6" fill="none" stroke="#fffdf8" stroke-width="4" stroke-linecap="round"/>
+</svg>

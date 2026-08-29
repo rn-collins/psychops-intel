@@ -73,7 +73,14 @@ export function hostMatches(host, allowed) {
   return allowed.some(value => host === value || host.endsWith("." + value));
 }
 
-export function validateCandidate(item, key) {
+// `stored: true` is used when re-reading records that already passed this policy
+// at collection time. The topic test must not run again there: the discovery
+// provider's full `text` is not persisted, only a truncated `snippet`, so
+// re-testing rejects records that genuinely qualified — silently emptying
+// categories whose stored state still reads "completed_with_findings", and
+// counting the losses as "rejected noise". Host and scheme are stable, so those
+// are still enforced on every read.
+export function validateCandidate(item, key, { stored = false } = {}) {
   const policy = POLICIES[key];
   const reasons = [];
   let url;
@@ -86,8 +93,10 @@ export function validateCandidate(item, key) {
   const host = url.hostname.toLowerCase().replace(/^www\./, "");
   if (hostMatches(host, BLOCKED_HOSTS)) reasons.push("blocked_source");
   if (!hostMatches(host, policy.allowedHosts)) reasons.push("outside_source_policy");
-  const haystack = [item.title, item.text, item.snippet].filter(Boolean).join(" ").toLowerCase();
-  if (!policy.requiredAny.some(term => haystack.includes(term))) reasons.push("topic_mismatch");
+  if (!stored) {
+    const haystack = [item.title, item.text, item.snippet].filter(Boolean).join(" ").toLowerCase();
+    if (!policy.requiredAny.some(term => haystack.includes(term))) reasons.push("topic_mismatch");
+  }
   return { accepted: reasons.length === 0, reasons, host };
 }
 
